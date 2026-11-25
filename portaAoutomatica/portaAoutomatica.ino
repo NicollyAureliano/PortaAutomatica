@@ -8,8 +8,9 @@ const int SENSOR_IR = 4;
 const int BUZZER = 6;
 const int MOTOR = 9;
 
-// Frequencia do buzzer
-const int FREQUENCIA = 450;
+// Frequencias do som Ding-Dong
+const int DING = 2000;
+const int DONG = 1500;
 const int TEMPO_FECHAMENTO = 3000;
 const int TEMPO_SOM = 150;
 
@@ -20,6 +21,16 @@ bool portaAberta = false;
 unsigned long tempoInicial = 0;
 unsigned long tempoBuzzer = 0;
 bool buzzerLigado = false;
+
+int etapaBuzzer = 0;
+
+// Funcao para iniciar o som Ding-Dong
+void iniciarDingDong() {
+  tone(BUZZER, DING);
+  buzzerLigado = true;
+  etapaBuzzer = 1;
+  tempoBuzzer = millis();
+}
 
 void setup() {
   // Configurando os pinos
@@ -62,10 +73,8 @@ void loop() {
       motor.write(90);
       portaAberta = true;
 
-      // Liga o buzzer com 2000 Hz
-      tone(BUZZER, FREQUENCIA);
-      buzzerLigado = true;
-      tempoBuzzer = millis();
+  // Toca o Ding-Dong na abertura
+     iniciarDingDong();
     }
 
     // Reinicia a contagem do fechamento
@@ -84,17 +93,34 @@ void loop() {
         motor.write(0);
         portaAberta = false;
 
-        // Liga o buzzer com 2000 Hz
-        tone(BUZZER, FREQUENCIA);
-        buzzerLigado = true;
-        tempoBuzzer = millis();
+     // Toca o Ding-Dong no fechamento
+       iniciarDingDong();
       }
     }
   }
 
-  // Desliga o buzzer depois de um tempo
-  if (buzzerLigado && millis() - tempoBuzzer >= TEMPO_SOM) {
+  // Controle do som Ding-Dong
+if (buzzerLigado) {
+
+  // Primeira nota: DING
+  if (etapaBuzzer == 1 && millis() - tempoBuzzer >= 180) {
+    noTone(BUZZER);
+    etapaBuzzer = 2;
+    tempoBuzzer = millis();
+  }
+
+  // Intervalo entre as notas
+  else if (etapaBuzzer == 2 && millis() - tempoBuzzer >= 100) {
+    tone(BUZZER, DONG);
+    etapaBuzzer = 3;
+    tempoBuzzer = millis();
+  }
+
+  // Segunda nota: DONG
+  else if (etapaBuzzer == 3 && millis() - tempoBuzzer >= 350) {
     noTone(BUZZER);
     buzzerLigado = false;
+    etapaBuzzer = 0;
   }
+}
 }
