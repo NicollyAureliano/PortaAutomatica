@@ -10,6 +10,8 @@ const int MOTOR = 9;
 
 // Frequencia do buzzer
 const int FREQUENCIA = 450;
+const int TEMPO_FECHAMENTO = 3000;
+const int TEMPO_SOM = 150;
 
 // Criando o servo motor
 Servo motor;
@@ -74,7 +76,7 @@ void loop() {
   else if (portaAberta) {
 
     // Espera 3 segundos antes de fechar
-    if (millis() - tempoInicial >= 3000) {
+    if (millis() - tempoInicial >= TEMPO_FECHAMENTO) {
 
       // Verifica novamente se existe obstaculo
       if (digitalRead(SENSOR_IR) == HIGH) {
@@ -90,8 +92,8 @@ void loop() {
     }
   }
 
-  // Desliga o buzzer depois de 150 milissegundos
-  if (buzzerLigado && millis() - tempoBuzzer >= 150) {
+  // Desliga o buzzer depois de um tempo
+  if (buzzerLigado && millis() - tempoBuzzer >= TEMPO_SOM) {
     noTone(BUZZER);
     buzzerLigado = false;
   }
