@@ -2,16 +2,18 @@
 #include <Servo.h>
 
 // Definindo os pinos dos componentes
-const int TRIG = 2;
-const int ECHO = 3;
+const int TRIG = 2; // Trig do sensor
+const int ECHO = 3; // echo do sensor 
 const int SENSOR_IR = 4;
 const int BUZZER = 6;
-const int SERVO = 9;
+const int MOTOR = 9;
+
+// Frequencia do buzzer
+const int FREQUENCIA = 450;
 
 // Criando o servo motor
 Servo motor;
 
-// Variáveis de controle
 bool portaAberta = false;
 unsigned long tempoInicial = 0;
 unsigned long tempoBuzzer = 0;
@@ -25,7 +27,7 @@ void setup() {
   pinMode(BUZZER, OUTPUT);
 
   // Iniciando os componentes
-  motor.attach(SERVO);
+  motor.attach(MOTOR);
   motor.write(0);
 
   digitalWrite(BUZZER, LOW);
@@ -33,7 +35,7 @@ void setup() {
 
 void loop() {
 
-  // Medindo a distância
+  // Medindo a distancia
   digitalWrite(TRIG, LOW);
   delayMicroseconds(2);
 
@@ -48,17 +50,18 @@ void loop() {
   // Verificando o sensor infravermelho
   bool obstaculo = digitalRead(SENSOR_IR) == LOW;
 
-  // Verificando se alguém está perto
+  // Verificando se alguem esta perto
   bool pessoaPerto = distancia > 0 && distancia <= 5;
 
-  // Se detectar alguém, abre a porta
+  // Se detectar alguem, abre a porta
   if (pessoaPerto || obstaculo) {
 
     if (!portaAberta) {
       motor.write(90);
       portaAberta = true;
 
-      digitalWrite(BUZZER, HIGH);
+      // Liga o buzzer com 2000 Hz
+      tone(BUZZER, FREQUENCIA);
       buzzerLigado = true;
       tempoBuzzer = millis();
     }
@@ -67,20 +70,20 @@ void loop() {
     tempoInicial = millis();
   }
 
-  // Se a porta estiver aberta e não houver obstáculos
+  // Se a porta estiver aberta e nao houver obstaculos
   else if (portaAberta) {
 
     // Espera 3 segundos antes de fechar
     if (millis() - tempoInicial >= 3000) {
 
-      // Verifica novamente se existe obstáculo
+      // Verifica novamente se existe obstaculo
       if (digitalRead(SENSOR_IR) == HIGH) {
 
         motor.write(0);
         portaAberta = false;
 
-        // Liga o buzzer
-        digitalWrite(BUZZER, HIGH);
+        // Liga o buzzer com 2000 Hz
+        tone(BUZZER, FREQUENCIA);
         buzzerLigado = true;
         tempoBuzzer = millis();
       }
@@ -89,7 +92,7 @@ void loop() {
 
   // Desliga o buzzer depois de 150 milissegundos
   if (buzzerLigado && millis() - tempoBuzzer >= 150) {
-    digitalWrite(BUZZER, LOW);
+    noTone(BUZZER);
     buzzerLigado = false;
   }
 }
